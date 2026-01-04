@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css"><link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet">
+		<link href="https://getbootstrap.com/docs/5.2/assets/css/docs.css" rel="stylesheet">
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>Tayo Gama</title>
+    </head>
+    <body class="p-3 m-0 border-0 bd-example">
+	<nav class="navbar navbar-expand-lg bg-info" ;>
+      <div class="container-fluid">
+        <a class="navbar-brand text-light" href="#">Bus Trans Gadjah Mada</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="true" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse show" id="navbarNavDropdown" style="">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active text-light" aria-current="page" href="#">Home</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle show text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="true">
+                Jadwal
+              </a>
+              <ul class="dropdown-menu" data-bs-popper="static">
+                <li><a class="dropdown-item" href="https://dppa.ugm.ac.id/wp-content/uploads/sites/1139/2022/04/Jadwal_1A_update.jpg">Rute Bus 1A</a></li>
+                <li><a class="dropdown-item" href="https://dppa.ugm.ac.id/wp-content/uploads/sites/1139/2022/04/Jadwal_1B_update.jpg">Rute Bus 1B</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script><script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="data/Bangunan_2.js"></script>
+        <script src="data/Jalan_3.js"></script>
+        <script src="data/Rute1BTransGadjahMada_4.js"></script>
+        <script src="data/Rute1ATransGadjahMada_5.js"></script>
+        <script src="data/Halte1BTransGadjahMada_6.js"></script>
+        <script src="data/Halte1ATransGadjahMada_7.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        })
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0]
+        .className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+            if (bounds_group.getLayers().length) {
+                map.fitBounds(bounds_group.getBounds());
+            }
+        }
+        map.createPane('pane_GoogleSatellite_0');
+        map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
+        var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_0',
+            opacity: 0.7,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_GoogleSatellite_0;
+        map.addLayer(layer_GoogleSatellite_0);
+        map.createPane('pane_OSMStandard_1');
+        map.getPane('pane_OSMStandard_1').style.zIndex = 401;
+        var layer_OSMStandard_1 = L.tileLayer('http://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OSMStandard_1',
+            opacity: 0.7,
+            attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, CC-BY-SA</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OSMStandard_1;
+        map.addLayer(layer_OSMStandard_1);
+        function pop_Bangunan_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Bangunan :</th>\
+                        <td>' + (feature.properties['Nama'] !== null ? autolinker.link(feature.properties['Nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Bangunan_2_0() {
+            return {
+                pane: 'pane_Bangunan_2',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(199,153,122,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Bangunan_2');
+        map.getPane('pane_Bangunan_2').style.zIndex = 402;
+        map.getPane('pane_Bangunan_2').style['mix-blend-mode'] = 'normal';
+        var layer_Bangunan_2 = new L.geoJson(json_Bangunan_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Bangunan_2',
+            layerName: 'layer_Bangunan_2',
+            pane: 'pane_Bangunan_2',
+            onEachFeature: pop_Bangunan_2,
+            style: style_Bangunan_2_0,
+        });
+        bounds_group.addLayer(layer_Bangunan_2);
+        map.addLayer(layer_Bangunan_2);
+        function pop_Jalan_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_id'] !== null ? autolinker.link(feature.properties['osm_id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['width'] !== null ? autolinker.link(feature.properties['width'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['bridge'] !== null ? autolinker.link(feature.properties['bridge'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['highway'] !== null ? autolinker.link(feature.properties['highway'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['name'] !== null ? autolinker.link(feature.properties['name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['tunnel'] !== null ? autolinker.link(feature.properties['tunnel'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['surface'] !== null ? autolinker.link(feature.properties['surface'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['smoothness'] !== null ? autolinker.link(feature.properties['smoothness'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['layer'] !== null ? autolinker.link(feature.properties['layer'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['oneway'] !== null ? autolinker.link(feature.properties['oneway'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Jalan_3_0() {
+            return {
+                pane: 'pane_Jalan_3',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: false,
+            }
+        }
+        function style_Jalan_3_1() {
+            return {
+                pane: 'pane_Jalan_3',
+                opacity: 1,
+                color: 'rgba(255,135,102,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0,
+                fillOpacity: 0,
+                interactive: false,
+            }
+        }
+        map.createPane('pane_Jalan_3');
+        map.getPane('pane_Jalan_3').style.zIndex = 403;
+        map.getPane('pane_Jalan_3').style['mix-blend-mode'] = 'normal';
+        var layer_Jalan_3 = new L.geoJson.multiStyle(json_Jalan_3, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_Jalan_3',
+            layerName: 'layer_Jalan_3',
+            pane: 'pane_Jalan_3',
+            onEachFeature: pop_Jalan_3,
+            styles: [style_Jalan_3_0,style_Jalan_3_1,]
+        });
+        bounds_group.addLayer(layer_Jalan_3);
+        map.addLayer(layer_Jalan_3);
+        function pop_Rute1BTransGadjahMada_4(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Rute1BTransGadjahMada_4_0() {
+            return {
+                pane: 'pane_Rute1BTransGadjahMada_4',
+                opacity: 1,
+                color: 'rgba(225,119,174,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: false,
+            }
+        }
+        map.createPane('pane_Rute1BTransGadjahMada_4');
+        map.getPane('pane_Rute1BTransGadjahMada_4').style.zIndex = 404;
+        map.getPane('pane_Rute1BTransGadjahMada_4').style['mix-blend-mode'] = 'normal';
+        var layer_Rute1BTransGadjahMada_4 = new L.geoJson(json_Rute1BTransGadjahMada_4, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_Rute1BTransGadjahMada_4',
+            layerName: 'layer_Rute1BTransGadjahMada_4',
+            pane: 'pane_Rute1BTransGadjahMada_4',
+            onEachFeature: pop_Rute1BTransGadjahMada_4,
+            style: style_Rute1BTransGadjahMada_4_0,
+        });
+        bounds_group.addLayer(layer_Rute1BTransGadjahMada_4);
+        map.addLayer(layer_Rute1BTransGadjahMada_4);
+        function pop_Rute1ATransGadjahMada_5(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Rute1ATransGadjahMada_5_0() {
+            return {
+                pane: 'pane_Rute1ATransGadjahMada_5',
+                opacity: 1,
+                color: 'rgba(253,245,8,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: false,
+            }
+        }
+        map.createPane('pane_Rute1ATransGadjahMada_5');
+        map.getPane('pane_Rute1ATransGadjahMada_5').style.zIndex = 405;
+        map.getPane('pane_Rute1ATransGadjahMada_5').style['mix-blend-mode'] = 'normal';
+        var layer_Rute1ATransGadjahMada_5 = new L.geoJson(json_Rute1ATransGadjahMada_5, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_Rute1ATransGadjahMada_5',
+            layerName: 'layer_Rute1ATransGadjahMada_5',
+            pane: 'pane_Rute1ATransGadjahMada_5',
+            onEachFeature: pop_Rute1ATransGadjahMada_5,
+            style: style_Rute1ATransGadjahMada_5_0,
+        });
+        bounds_group.addLayer(layer_Rute1ATransGadjahMada_5);
+        map.addLayer(layer_Rute1ATransGadjahMada_5);
+        function pop_Halte1BTransGadjahMada_6(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Nomor Halte :</th>\
+                        <td>' + (feature.properties['no_halte'] !== null ? autolinker.link(feature.properties['no_halte'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Nama Halte :</th>\
+                        <td>' + (feature.properties['nm_halte'] !== null ? autolinker.link(feature.properties['nm_halte'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Foto :</th>\
+                        <td>' + (feature.properties['foto'] !== null ? '<img src="images/' + String(feature.properties['foto']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Rute :</th>\
+                        <td>' + (feature.properties['rute'] !== null ? autolinker.link(feature.properties['rute'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Halte1BTransGadjahMada_6_0() {
+            return {
+                pane: 'pane_Halte1BTransGadjahMada_6',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/bus_116535.svg',
+            iconSize: [22.799999999999997, 22.799999999999997]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Halte1BTransGadjahMada_6');
+        map.getPane('pane_Halte1BTransGadjahMada_6').style.zIndex = 406;
+        map.getPane('pane_Halte1BTransGadjahMada_6').style['mix-blend-mode'] = 'normal';
+        var layer_Halte1BTransGadjahMada_6 = new L.geoJson(json_Halte1BTransGadjahMada_6, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Halte1BTransGadjahMada_6',
+            layerName: 'layer_Halte1BTransGadjahMada_6',
+            pane: 'pane_Halte1BTransGadjahMada_6',
+            onEachFeature: pop_Halte1BTransGadjahMada_6,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_Halte1BTransGadjahMada_6_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_Halte1BTransGadjahMada_6);
+        map.addLayer(layer_Halte1BTransGadjahMada_6);
+        function pop_Halte1ATransGadjahMada_7(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Nomor Halte :</th>\
+                        <td>' + (feature.properties['no_halte'] !== null ? autolinker.link(feature.properties['no_halte'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Nama Halte :</th>\
+                        <td>' + (feature.properties['nm_halte'] !== null ? autolinker.link(feature.properties['nm_halte'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Foto :</th>\
+                        <td>' + (feature.properties['foto'] !== null ? '<img src="images/' + String(feature.properties['foto']).replace(/[\\\/:]/g, '_').trim() + '">' : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Rute Halte :</th>\
+                        <td>' + (feature.properties['rute'] !== null ? autolinker.link(feature.properties['rute'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_Halte1ATransGadjahMada_7_0() {
+            return {
+                pane: 'pane_Halte1ATransGadjahMada_7',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/bus_116126.svg',
+            iconSize: [22.799999999999997, 22.799999999999997]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Halte1ATransGadjahMada_7');
+        map.getPane('pane_Halte1ATransGadjahMada_7').style.zIndex = 407;
+        map.getPane('pane_Halte1ATransGadjahMada_7').style['mix-blend-mode'] = 'normal';
+        var layer_Halte1ATransGadjahMada_7 = new L.geoJson(json_Halte1ATransGadjahMada_7, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Halte1ATransGadjahMada_7',
+            layerName: 'layer_Halte1ATransGadjahMada_7',
+            pane: 'pane_Halte1ATransGadjahMada_7',
+            onEachFeature: pop_Halte1ATransGadjahMada_7,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_Halte1ATransGadjahMada_7_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_Halte1ATransGadjahMada_7);
+        map.addLayer(layer_Halte1ATransGadjahMada_7);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'<img src="legend/Halte1ATransGadjahMada_7.png" /> Halte 1A Trans Gadjah Mada': layer_Halte1ATransGadjahMada_7,'<img src="legend/Halte1BTransGadjahMada_6.png" /> Halte 1B Trans Gadjah Mada': layer_Halte1BTransGadjahMada_6,'<img src="legend/Rute1ATransGadjahMada_5.png" /> Rute 1A Trans Gadjah Mada': layer_Rute1ATransGadjahMada_5,'<img src="legend/Rute1BTransGadjahMada_4.png" /> Rute 1B Trans Gadjah Mada': layer_Rute1BTransGadjahMada_4,'<img src="legend/Jalan_3.png" /> Jalan': layer_Jalan_3,'<img src="legend/Bangunan_2.png" /> Bangunan': layer_Bangunan_2,"OSM Standard": layer_OSMStandard_1,"Google Satellite": layer_GoogleSatellite_0,}).addTo(map);
+        setBounds();
+        </script>
+    </body>
+</html>
